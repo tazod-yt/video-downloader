@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StreamGrab - HLS to MP4 Converter</title>
+  <link rel="stylesheet" href="hls-downloader.css">
+  <script src="lib/mux.min.js"></script>
+</head>
+<body>
+  <div class="page-container">
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </div>
+        <div>
+          <h1>StreamGrab In-Browser Transmuxer</h1>
+          <p class="subtitle">Convert HLS (.m3u8) streams to MP4 directly on your GPU/CPU with Zero Backend</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge badge-accent">100% Client-Side</span>
+        <span class="badge badge-success">No Companion App Required</span>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Stream Configuration Card -->
+      <section class="card config-card">
+        <h2 class="card-title">Stream Configuration</h2>
+        <div class="form-group">
+          <label for="streamUrl">HLS Stream Playlist (.m3u8 URL)</label>
+          <div class="input-with-button">
+            <input type="text" id="streamUrl" placeholder="Enter stream playlist URL (.m3u8)" spellcheck="false">
+            <button id="loadStreamBtn" class="btn btn-secondary">Load Playlist</button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label for="outputFilename">Output Filename</label>
+            <input type="text" id="outputFilename" placeholder="video.mp4">
+          </div>
+          <div class="form-group flex-1">
+            <label for="qualitySelect">Stream Quality / Variant</label>
+            <select id="qualitySelect" disabled>
+              <option value="">Default / Auto</option>
+            </select>
+          </div>
+          <div class="form-group flex-1">
+            <label for="concurrencySelect">Parallel Threads</label>
+            <select id="concurrencySelect">
+              <option value="2">2 (Conservative)</option>
+              <option value="4">4 (Recommended)</option>
+              <option value="6" selected>6 (Fast)</option>
+              <option value="10">10 (Turbo)</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Status & Progress Card -->
+      <section id="progressCard" class="card progress-card hidden">
+        <div class="progress-header">
+          <div>
+            <h3 id="statusHeading" class="status-heading">Ready</h3>
+            <p id="statusSubtext" class="status-subtext">Waiting to begin conversion...</p>
+          </div>
+          <div class="action-buttons">
+            <button id="startBtn" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              Start Download
+            </button>
+            <button id="pauseBtn" class="btn btn-secondary hidden">Pause</button>
+            <button id="cancelBtn" class="btn btn-danger hidden">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-track">
+            <div id="progressBar" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+          <div class="progress-bar-info">
+            <span id="percentText">0%</span>
+            <span id="segmentCounter">0 / 0 segments</span>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-label">Speed</span>
+            <span id="speedStat" class="stat-value">0.0 MB/s</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Downloaded</span>
+            <span id="sizeStat" class="stat-value">0 MB</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Elapsed Time</span>
+            <span id="elapsedStat" class="stat-value">00:00</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Estimated Remaining</span>
+            <span id="etaStat" class="stat-value">--:--</span>
+          </div>
+        </div>
+
+        <!-- Console Log -->
+        <div class="log-container">
+          <div class="log-header">
+            <span>Live Conversion Terminal</span>
+            <button id="clearLogBtn" class="btn-text">Clear</button>
+          </div>
+          <pre id="logOutput" class="log-output"></pre>
+        </div>
+      </section>
+
+      <!-- Completed Success Card -->
+      <section id="completedCard" class="card completed-card hidden">
+        <div class="success-banner">
+          <div class="success-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div class="success-info">
+            <h2>Transmuxing Complete!</h2>
+            <p id="completionSummary">Your video is packaged as a standard MP4 file.</p>
+          </div>
+        </div>
+
+        <div class="preview-player-container">
+          <video id="finalVideoPlayer" controls playsinline></video>
+        </div>
+
+        <div class="completion-actions">
+          <button id="saveFileBtn" class="btn btn-primary btn-large">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Save MP4 to Disk
+          </button>
+          <button id="newConversionBtn" class="btn btn-secondary">Convert Another Stream</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>StreamGrab &bull; Powered by client-side Web Workers, Fetch API & Mux.js &bull; Zero Server Footprint</p>
+    </footer>
+  </div>
+
+  <script src="hls-downloader.js"></script>
+</body>
+</html>

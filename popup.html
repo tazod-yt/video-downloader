@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StreamGrab</title>
+  <link rel="stylesheet" href="popup.css">
+  <script src="lib/hls.light.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-box">
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>StreamGrab</h1>
+          <span class="subtext">Client-Side Video Ripper</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="refreshBtn" class="icon-btn" title="Rescan page for new videos (No reload)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+        </button>
+        <button id="clearBtn" class="icon-btn" title="Clear detected list">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="tab-info">
+      <span class="pulse-dot"></span>
+      <span id="tabHost" class="tab-host">Current Tab</span>
+      <span id="mediaCount" class="media-count">0 videos</span>
+    </div>
+
+    <main class="media-list-container">
+      <div id="loadingState" class="state-box hidden">
+        <div class="spinner"></div>
+        <p>Scanning media network traffic...</p>
+      </div>
+
+      <div id="emptyState" class="state-box">
+        <div class="empty-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+        </div>
+        <h3>No videos detected</h3>
+        <p>Play a video on the page to trigger detection, then open this popup again.</p>
+      </div>
+
+      <div id="mediaList" class="media-list"></div>
+    </main>
+
+    <footer class="app-footer">
+      <div class="badge-tag">Zero Backend &bull; 100% In-Browser</div>
+      <div class="version">v1.0.0</div>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
